@@ -1,19 +1,19 @@
 package flashcards;
 
-public class Card<T> {
+public class Card<T, U> {
     private T term;
-    private T definition;
+    private U definition;
 
-    public Card(T t, T d) {
+    public Card(T t, U d) {
         this.term = t;
         this.definition = d;
     }
 
-    public T getDefinition() {
+    public U getDefinition() {
         return definition;
     }
 
-    public void setDefinition(T definition) {
+    public void setDefinition(U definition) {
         this.definition = definition;
     }
 

@@ -9,12 +9,19 @@ public class FlashCardDeck<T, U> {
         flashcards = new LinkedHashMap<>();
     }
 
-    public void addCard(Card c) {
-        flashcards.put((T) c.getTerm(), (U) c.getDefinition());
+    public void addCard(Card<T, U> c) {
+        flashcards.put(c.getTerm(), c.getDefinition());
     }
 
-    public T getDefinitionFromTerm(T term) {
-        return (T) flashcards.get(term);
+    public U getDefinitionFromTerm(T term) {
+        Set<Map.Entry<T, U>> entrySet = flashcards.entrySet();
+
+        for (Map.Entry<T, U> pair : entrySet) {
+            if (Objects.equals(pair.getKey(), term)) {
+                return pair.getValue();
+            }
+        }
+        return null;
     }
 
     public T getTermFromDefinition(T definition) {
@@ -22,7 +29,7 @@ public class FlashCardDeck<T, U> {
 
         for (Map.Entry<T, U> pair : entrySet) {
             if (Objects.equals(pair.getValue(), definition)) {
-                return (T) pair.getValue();
+                return pair.getKey();
             }
         }
         return null;
