@@ -30,12 +30,13 @@ public class Main {
                     break;
 
                 case "import":
-
+                    application.importFile();
                     break;
 
                 case "export":
-
+                    application.export();
                     break;
+
                 case "ask":
                     application.ask();
                     break;

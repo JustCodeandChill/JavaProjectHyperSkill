@@ -13,7 +13,13 @@ public class FlashCardDeck<T, U> {
         flashcards.put(c.getTerm(), c.getDefinition());
     }
 
+    public void addCard(T term, U definition) {
+        flashcards.put(term, definition);
+    }
+
     public void removeCard(T term) { flashcards.remove(term); }
+
+    public void replaceCard(T term, U definition) { flashcards.replace(term, definition);}
 
     public int size() { return flashcards.size(); }
     public U getDefinitionFromTerm(T term) {
@@ -58,5 +64,16 @@ public class FlashCardDeck<T, U> {
 
     public Set<T> keySet() {
         return flashcards.keySet();
+    }
+
+    @Override
+    public String toString() {
+        Set<Map.Entry<T, U>> entrySet = flashcards.entrySet();
+        String str = " ";
+
+        for (Map.Entry<T, U> pair : entrySet) {
+            str = pair.getKey() + " : " + pair.getValue() + "\n";
+        }
+        return str;
     }
 }

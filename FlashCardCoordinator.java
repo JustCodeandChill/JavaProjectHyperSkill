@@ -1,4 +1,5 @@
 package flashcards;
+import java.io.*;
 import java.util.*;
 
 public class FlashCardCoordinator<T, U> {
@@ -30,6 +31,7 @@ public class FlashCardCoordinator<T, U> {
         Card<T, U> card = new Card<>(term, definition);
         flashcards.addCard(card);
         System.out.println("The pair (\""+ term + "\":\""+ definition + "\") has been added.");
+        //System.out.println(flashcards.toString());
     }
 
     public void remove() {
@@ -51,7 +53,7 @@ public class FlashCardCoordinator<T, U> {
             T answer = (T) scanner.nextLine();
 
             T correctAnswer = (T) flashcards.getDefinitionFromTerm(term);
-            System.out.println("Answer:" + answer + "Correct answer:" + correctAnswer);
+            //System.out.println("Answer:" + answer + " .Correct answer:" + correctAnswer);
             if (Objects.equals(correctAnswer, answer)) {
                 System.out.println("Correct answer.");
             } else {
@@ -88,6 +90,7 @@ public class FlashCardCoordinator<T, U> {
     public void ask() {
         System.out.println("How many times to ask?");
         int times =  scanner.nextInt();
+        scanner.skip("\n");
         int size = flashcards.size();
 
         if (times > size) {
@@ -96,7 +99,7 @@ public class FlashCardCoordinator<T, U> {
             int count = 0;
 
             //Loop the whole deck
-            while (count < timeToLoopTheWholeDeck){
+            while (count < timeToLoopTheWholeDeck - 1){
                 askDefinitionOfAllCards();
                 count++;
             }
@@ -107,6 +110,57 @@ public class FlashCardCoordinator<T, U> {
             askDefinitionOfNCards(numberOfCardsToLoop);
         }else {
             askDefinitionOfAllCards();
+        }
+    }
+
+    public void export() {
+
+        System.out.println("File name:");
+        T filename = (T) scanner.nextLine();
+
+        File file = new File("./" + filename);
+        try (FileWriter writer = new FileWriter(file)){
+
+            for (T term : flashcards.keySet()) {
+                U definition = flashcards.getDefinitionFromTerm(term);
+                writer.write(term + "\n");
+                writer.write(definition + "\n");
+            }
+
+            System.out.println(flashcards.size() + " cards have been saved.");
+        }catch (IOException e){
+            System.out.println(" An exception occur" + e);
+        }
+    }
+
+    public void importFile() {
+        System.out.println("File name:");
+        T filename = (T) scanner.nextLine();
+
+        File file = new File("./" + filename);
+        this.scanner.close();
+        try (Scanner scanner = new Scanner(file)){
+//            scanner.skip("\n");
+            while (scanner.hasNext()) {
+                T term = (T) scanner.nextLine();
+                U definition = (U) scanner.nextLine();
+
+                if (flashcards.containsTerm(term)) {
+                    if (flashcards.containsDefinition((T) definition))
+                        continue;
+
+                    flashcards.replaceCard(term, definition);
+                }else {
+                    flashcards.addCard(term, definition);
+                }
+            }
+
+            int size = flashcards.size();
+            this.scanner = new Scanner(System.in);
+                System.out.println( size + " cards have been loaded.");
+
+        }catch (FileNotFoundException e) {
+            System.out.println("File not found.");
         }
     }
 }
