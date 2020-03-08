@@ -13,6 +13,9 @@ public class FlashCardDeck<T, U> {
         flashcards.put(c.getTerm(), c.getDefinition());
     }
 
+    public void removeCard(T term) { flashcards.remove(term); }
+
+    public int size() { return flashcards.size(); }
     public U getDefinitionFromTerm(T term) {
         Set<Map.Entry<T, U>> entrySet = flashcards.entrySet();
 
