@@ -94,19 +94,22 @@ public class FlashCardCoordinator<T, U> {
         int size = flashcards.size();
 
         if (times > size) {
+//            System.out.println("In times > size");
             int timeToLoopTheWholeDeck = times / size;
             int numberOfCardsToLoop = times % size;
             int count = 0;
 
             //Loop the whole deck
-            while (count < timeToLoopTheWholeDeck - 1){
+            while (count < timeToLoopTheWholeDeck ){
                 askDefinitionOfAllCards();
                 count++;
             }
             // Loop timeToLoopTheDeckPartially elements in the deck
-            askDefinitionOfNCards(numberOfCardsToLoop);
+//            System.out.println("In times > size part2");
+            askDefinitionOfNCards(numberOfCardsToLoop + 1);
         }else if (times < size) {
-            int numberOfCardsToLoop = size - times;
+            int numberOfCardsToLoop = size - times + 1;
+//            System.out.println("In times < size");
             askDefinitionOfNCards(numberOfCardsToLoop);
         }else {
             askDefinitionOfAllCards();
@@ -120,14 +123,15 @@ public class FlashCardCoordinator<T, U> {
 
         File file = new File("./" + filename);
         try (FileWriter writer = new FileWriter(file)){
-
+            int size = 0;
             for (T term : flashcards.keySet()) {
                 U definition = flashcards.getDefinitionFromTerm(term);
                 writer.write(term + "\n");
                 writer.write(definition + "\n");
+                size++;
             }
 
-            System.out.println(flashcards.size() + " cards have been saved.");
+            System.out.println(size + " cards have been saved.");
         }catch (IOException e){
             System.out.println(" An exception occur" + e);
         }
@@ -138,28 +142,34 @@ public class FlashCardCoordinator<T, U> {
         T filename = (T) scanner.nextLine();
 
         File file = new File("./" + filename);
-        this.scanner.close();
-        try (Scanner scanner = new Scanner(file)){
+        if (file.exists()) {
+            try (Scanner scanner = new Scanner(file)){
 //            scanner.skip("\n");
-            while (scanner.hasNext()) {
-                T term = (T) scanner.nextLine();
-                U definition = (U) scanner.nextLine();
+                int size = 0;
+                while (scanner.hasNext()) {
+                    T term = (T) scanner.nextLine();
+                    U definition = (U) scanner.nextLine();
+//                    System.out.println(term + ":" + definition);
+                    size++;
+                    if (flashcards.containsTerm(term)) {
+                        if (flashcards.containsDefinition((T) definition))
+                            continue;
 
-                if (flashcards.containsTerm(term)) {
-                    if (flashcards.containsDefinition((T) definition))
-                        continue;
+                        flashcards.replaceCard(term, definition);
+                    }else {
+                        flashcards.addCard(term, definition);
+                    }
 
-                    flashcards.replaceCard(term, definition);
-                }else {
-                    flashcards.addCard(term, definition);
                 }
-            }
 
-            int size = flashcards.size();
-            this.scanner = new Scanner(System.in);
+
+                this.scanner = new Scanner(System.in);
                 System.out.println( size + " cards have been loaded.");
 
-        }catch (FileNotFoundException e) {
+            }catch (FileNotFoundException e) {
+                System.out.println("File not found.");
+            }
+        }else {
             System.out.println("File not found.");
         }
     }

@@ -16,6 +16,7 @@ public class Main {
         boolean isValidAction = true;
         String actionToExit = "exit";
         do {
+            scanner = new Scanner(System.in).useDelimiter("\\n");
             System.out.println("Input the action (add, remove, import, export, ask, exit):");
             action = scanner.nextLine();
 
