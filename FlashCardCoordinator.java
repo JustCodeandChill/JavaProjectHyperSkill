@@ -68,7 +68,7 @@ public class FlashCardCoordinator<T, U> {
     public void askDefinitionOfNCards(int n) {
         int count = 0;
         for (T term : flashcards.keySet()) {
-
+            if (count == n - 1) break;
             System.out.println("Print the definition of \"" + term + "\":");
             T answer = (T) scanner.nextLine();
 
@@ -84,7 +84,7 @@ public class FlashCardCoordinator<T, U> {
                 }
             }
             count++;
-            if (count == n - 1) break;
+
         }
     }
     public void ask() {

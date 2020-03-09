@@ -23,7 +23,6 @@ public class Main {
             switch (action){
                 case "add":
                     application.add();
-
                     break;
 
                 case "remove":
