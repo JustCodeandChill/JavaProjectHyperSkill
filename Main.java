@@ -9,8 +9,12 @@ public class Main {
         //Instantiaze scanner
         Scanner scanner = new Scanner(System.in).useDelimiter("\\n");
         //flash cards will be store in a Hash map in form "term" : "definition"
-        FlashCardDeck<String, String> flashCards = new FlashCardDeck<>();
-        FlashCardCoordinator application = new FlashCardCoordinator(flashCards);
+        //implementation of stage 5
+//        FlashCardDeck<String, String> flashCards = new FlashCardDeck<>();
+//        FlashCardCoordinator application = new FlashCardCoordinator(flashCards);
+        //implementation of stage 6
+        FlashCardDeckForStageSix flashcards = new FlashCardDeckForStageSix();
+        FlashCardCoordinatorStageSix application = new FlashCardCoordinatorStageSix(flashcards);
 
         String action =  " ";
         boolean isValidAction = true;
@@ -23,6 +27,7 @@ public class Main {
             switch (action){
                 case "add":
                     application.add();
+
                     break;
 
                 case "remove":
@@ -30,7 +35,7 @@ public class Main {
                     break;
 
                 case "import":
-                    application.importFile();
+                    application.importCards();
                     break;
 
                 case "export":

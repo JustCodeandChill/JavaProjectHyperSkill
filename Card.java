@@ -3,10 +3,18 @@ package flashcards;
 public class Card<T, U> {
     private T term;
     private U definition;
+    private int errorness;
+
+    public Card(T t, U d, int e) {
+        this.term = t;
+        this.definition = d;
+        this.errorness = e;
+    }
 
     public Card(T t, U d) {
         this.term = t;
         this.definition = d;
+        this.errorness = 0;
     }
 
     public U getDefinition() {
