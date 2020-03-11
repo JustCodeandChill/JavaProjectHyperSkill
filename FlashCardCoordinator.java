@@ -154,18 +154,13 @@ public class FlashCardCoordinator<T, U> {
                     if (flashcards.containsTerm(term)) {
                         if (flashcards.containsDefinition((T) definition))
                             continue;
-
                         flashcards.replaceCard(term, definition);
                     }else {
                         flashcards.addCard(term, definition);
                     }
-
                 }
-
-
                 this.scanner = new Scanner(System.in);
                 System.out.println( size + " cards have been loaded.");
-
             }catch (FileNotFoundException e) {
                 System.out.println("File not found.");
             }
@@ -173,4 +168,6 @@ public class FlashCardCoordinator<T, U> {
             System.out.println("File not found.");
         }
     }
+
+
 }

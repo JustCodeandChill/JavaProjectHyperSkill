@@ -21,13 +21,12 @@ public class Main {
         String actionToExit = "exit";
         do {
             scanner = new Scanner(System.in).useDelimiter("\\n");
-            System.out.println("Input the action (add, remove, import, export, ask, exit):");
+            System.out.println("Input the action (add, remove, import, export, ask, exit, log, hardest card, reset stats):");
             action = scanner.nextLine();
 
             switch (action){
                 case "add":
                     application.add();
-
                     break;
 
                 case "remove":
@@ -44,6 +43,18 @@ public class Main {
 
                 case "ask":
                     application.ask();
+                    break;
+
+                case "log":
+                    application.log();
+                    break;
+
+                case "hardest card":
+                    application.hardestCard();
+                    break;
+
+                case "reset stats":
+                    application.resetStats();
                     break;
 
                 case "exit":

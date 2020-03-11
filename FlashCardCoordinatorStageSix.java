@@ -12,10 +12,12 @@ import java.util.Set;
 public class FlashCardCoordinatorStageSix<T> {
     FlashCardDeckForStageSix flashcards;
     Scanner scanner;
+    ArrayList<String> logFile;
 
     public FlashCardCoordinatorStageSix(FlashCardDeckForStageSix flashCardDeck) {
         this.flashcards = flashCardDeck;
         scanner = new Scanner(System.in);
+        this.logFile =  new ArrayList<>();
     }
 
     public void add() {
@@ -66,15 +68,16 @@ public class FlashCardCoordinatorStageSix<T> {
                 while (scanner.hasNext()) {
                     T term = (T) scanner.nextLine();
                     T definition = (T) scanner.nextLine();
+//                    Integer errorness = Integer.valueOf(scanner.nextLine());
 //                    System.out.println(term + ":" + definition);
                     size++;
                     if (flashcards.containsTerm(term)) {
                         if (flashcards.containsDefinition((T) definition))
                             continue;
 
-                        flashcards.replaceCard(term, definition);
+                        flashcards.replaceCard(term, definition, 2);
                     }else {
-                        Card card = new Card(term, definition);
+                        Card card = new Card(term, definition, 5);
                         flashcards.addCard(card);
                     }
                 }
@@ -150,6 +153,8 @@ public class FlashCardCoordinatorStageSix<T> {
             if (Objects.equals(correctAnswer, answer)) {
                 System.out.println("Correct answer.");
             } else {
+                Card card = flashcards.getCardByTerm(term);
+                card.increaseErrornessByOne();
                 if (flashcards.containsDefinition(answer)) {
                     System.out.println("Wrong answer. The correct one is \"" + correctAnswer + "\", you've just written the definition of \"" + flashcards.getTermFromDefinition(answer) + "\".");
                 } else {
@@ -170,6 +175,8 @@ public class FlashCardCoordinatorStageSix<T> {
             if (Objects.equals(correctAnswer, answer)) {
                 System.out.println("Correct answer.");
             } else {
+                Card card = flashcards.getCardByTerm(term);
+                card.increaseErrornessByOne();
                 if (flashcards.containsDefinition(answer)) {
                     System.out.println("Wrong answer. The correct one is \"" + correctAnswer + "\", you've just written the definition of \"" + flashcards.getTermFromDefinition(answer) + "\".");
                 } else {
@@ -177,6 +184,114 @@ public class FlashCardCoordinatorStageSix<T> {
                 }
             }
             count++;
+        }
+    }
+//End of stage 5 functions
+
+// Stage 6 functions
+    public void hardestCard() {
+        int max = Integer.MIN_VALUE;
+        ArrayList<T> errorCards = new ArrayList<>();
+
+        for (Object term : flashcards.keySet()) {
+            Card card = flashcards.getCardByTerm(term);
+            
+            if (max < card.getErrorness())
+                max = card.getErrorness();
+        }
+        
+        //Find card with most error
+        if (max < 0) {
+            String line = "There are no cards with errors.";
+            System.out.println(line);
+            this.logFile.add(line);
+            return;
+        }
+
+        if (max == 0) {
+            String line = "There are no cards with errors.";
+            System.out.println("There are no cards with errors.");
+            this.logFile.add(line);
+            return;
+        }
+
+        for (Object term : flashcards.keySet()) {
+            Card card = flashcards.getCardByTerm(term);
+            if (card.getErrorness() == max)
+                errorCards.add((T) card.getTerm());
+        }
+
+        printErrorStatistic(errorCards);
+    }
+    
+    public void printErrorStatistic(ArrayList<T> errorCards) {
+        int numberOfErrorTerm = errorCards.size();
+        String line = "";
+
+        if (logFile == null)
+            System.out.println("It is null");
+
+        if (numberOfErrorTerm == 0) {
+            System.out.println("There are no cards with errors.");
+            this.logFile.add(line);
+        }else if (numberOfErrorTerm == 1) {
+            T term = errorCards.get(0);
+            int numberOfError = flashcards.getCardByTerm(term).getErrorness();
+            line = "The hardest card is \"" + term + "\". You have " + numberOfError + " errors answering it.";
+
+            System.out.println(line);
+            this.logFile.add(line);
+
+        }else if (numberOfErrorTerm > 1) {
+            line += "The hardest cards are ";
+            System.out.print("The hardest cards are ");
+            for (T term : errorCards) {
+                // To print out "term. " if it is the last word of error cards
+                if (errorCards.lastIndexOf(term) != (errorCards.size() - 1)) {
+                    line += "\"" + term + "\", ";
+                    System.out.print("\"" + term + "\", ");
+                }
+                else{
+                    line += "\"" + term + "\". ";
+                    System.out.print("\"" + term + "\". ");
+                }
+            }
+            int numberOfError = flashcards.getCardByTerm(errorCards.get(0)).getErrorness();
+            line += "You have " + numberOfError + " errors answering them.";
+            System.out.print("You have " + numberOfError + " errors answering them.\n");
+            this.logFile.add(line);
+        }
+    }
+
+    public void resetStats() {
+        for (Object term : flashcards.keySet()) {
+            Card card = flashcards.getCardByTerm(term);
+            card.setErrorness(0);
+        }
+        String line = "reset";
+        System.out.println(line);
+        this.logFile.add(line);
+    }
+
+    public void log() {
+        System.out.println("File name:");
+        T filename = (T) scanner.nextLine();
+//        for (int i = 0; i < logFile.size(); i++) {
+//            System.out.print(logFile.get(i));
+//        }
+//        System.out.println("");
+
+        File file = new File("./" + filename);
+        try (FileWriter fw = new FileWriter(file)) {
+            for (int i = 0; i < this.logFile.size() - 1; i++) {
+                T line = (T) logFile.get(i);
+                fw.write((String) line);
+                fw.write("\n");
+            }
+            String line = "saved";
+            System.out.println(line);
+        }catch (IOException e){
+            System.out.println(e.getMessage());
         }
     }
 }

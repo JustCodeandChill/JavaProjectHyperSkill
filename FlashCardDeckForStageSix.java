@@ -17,11 +17,11 @@ public class FlashCardDeckForStageSix<T> {
     }
 
     public void removeCard(T term) {
-        Card card = this.returnCardByTerm(term);
+        Card card = this.getCardByTerm(term);
         flashcards.remove(card);
     }
 
-    public Card returnCardByTerm(T term) {
+    public Card getCardByTerm(T term) {
         for (Card card : flashcards) {
             if (Objects.equals(card.getTerm(), term)) {
                 return card;
@@ -30,11 +30,14 @@ public class FlashCardDeckForStageSix<T> {
         return null;
     }
 
-    public void replaceCard(T term, T definition) {
-        Card card = this.returnCardByTerm(term);
+    public void replaceCard(T term, T definition, Object error) {
+        Card card = this.getCardByTerm(term);
         if ( card != null) {
             card.setDefinition(definition);
         }
+        if (error == null) card.setErrorness(0);
+        else card.setErrorness((Integer) error);
+
     }
 
     public int size() {
@@ -84,5 +87,15 @@ public class FlashCardDeckForStageSix<T> {
         }
         return false;
     }
+
+    public boolean cardHasBeenAsk() {
+        for (Card card : flashcards) {
+            if (card.getUpdateError()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
 }
