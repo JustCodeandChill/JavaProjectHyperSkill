@@ -1,6 +1,4 @@
-package flashcards;
-
-
+/*package flashcards;
 import java.util.Scanner;
 import java.util.*;
 
@@ -65,58 +63,287 @@ public class Main {
                     isValidAction = false;
             }
         }while(!Objects.equals(action, actionToExit) && isValidAction);
+    }
+}*/
+
+package flashcards;
+
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+    private static final String ADD = "add";
+    private static final String REMOVE = "remove";
+    private static final String IMPORT = "import";
+    private static final String EXPORT = "export";
+    private static final String ASK = "ask";
+    private static final String EXIT = "exit";
+    private static final String LOG = "log";
+    private static final String HARDEST = "hardest card";
+    private static final String RESET = "reset stats";
+
+    private static final String PRINT = "print";
+    private static final String PRINT_MIS = "print mistakes";
+
+    private static final ArrayList<String> LOGGER = new ArrayList<>();
+
+    private static Map<String, String> flashCards =  new LinkedHashMap<>();
+    private static Map<String, Integer> mistakes = new LinkedHashMap<>();
+
+    public static void main(String[] args) {
+        String userInput;
+        do {
+            printMsg("Input the action (add, remove, import, export, ask, exit, log, hardest card, reset stats):");
+            userInput = inputMsg().toLowerCase();
+            switch (userInput) {
+                case ADD: {
+                    addCard();
+                    break;
+                }
+                case REMOVE: {
+                    removeCard();
+                    break;
+                }
+                case IMPORT: {
+                    importCards();
+                    break;
+                }
+                case EXPORT: {
+                    exportCards();
+                    break;
+                }
+                case ASK: {
+                    ask();
+                    break;
+                }
+                case LOG: {
+                    log();
+                    break;
+                }
+                case PRINT: {
+                    printCards();
+                    break;
+                }
+                case PRINT_MIS: {
+                    printMistakes();
+                    break;
+                }
+                case HARDEST: {
+                    hardestCard();
+                    break;
+                }
+                case RESET: {
+                    resetMistakes();
+                    break;
+                }
+            }
+
+        } while (!userInput.equals(EXIT));
+        System.out.println("Bye bye!");
+    }
+
+    private static void addCard() {
+        String term;
+        String definition;
+
+        printMsg("The card:");
+        term = inputMsg();
+        if (flashCards.containsKey(term)) { // if card term already exists, break from method
+            printMsg("The card \"" + term + "\" already exists.");
+            return;
+        }
+        printMsg("The definition of the card:");
+        definition = inputMsg();
+        if (flashCards.containsValue(definition)) { // if card definition already exists loop until until unused definition input
+            printMsg("The definition \"" + definition + "\" already exists.");
+            return;
+        }
+        flashCards.put(term, definition);
+        printMsg(String.format("The pair (\"%s\":\"%s\") has been added.", term, definition));
+
+    }
+
+    private static void removeCard() {
+        printMsg("The card:");
+        String userInput = inputMsg();
+        if (flashCards.containsKey(userInput)) {
+            flashCards.remove(userInput);
+            mistakes.remove(userInput);
+            printMsg("The card has been removed.");
+        } else {
+            printMsg(String.format("Can't remove \"%s\": there is no such card.", userInput));
+        }
+
+    }
+
+    private static void importCards() {
+        String fileName;
+        printMsg("File name:");
+        fileName = inputMsg();
+        File file = new File("./" + fileName);
+        try (Scanner fileScanner = new Scanner(file);) {
+            String term = null;
+            String definition = null;
+            int mistake = 0;
+            int count = 0;
+            while (fileScanner.hasNext()) {
+                String entry = fileScanner.nextLine();
+                String[] entrySplit = entry.split(":");
+                term = entrySplit[0];
+                definition = entrySplit[1];
+                mistake = Integer.parseInt(entrySplit[2]);
+                flashCards.put(term, definition);
+                mistakes.put(term, mistake);
+                count++;
+            }
+            printMsg(count + " " + (count > 1 ? "cards have been loaded." : "card has been loaded."));
+        } catch (FileNotFoundException e) {
+            printMsg("File not found. Error: " + e);
+        }
 
 
+    }
 
-        //Ask for all the definition in numberOfCards times and build the cardDefinition array
-        // When the user tries to add a duplicated term or definition,
-        // forbid it and ask again until the user inputs a unique one
-//        while (count < numberOfCards){
-//            System.out.println("The card #" + (count+1) + ":");
-//            String term = scanner.nextLine();
-//
-//            while (flashCards.containsTerm(term)) {
-//                System.out.println("The card \"" + term + "\" already exists. Try again:");
-//                term = scanner.nextLine();
-//            }
-//
-//            System.out.println("The definition of the card #" + (count+1) + ":");
-//            String definition = scanner.nextLine();
-//
-//            while (flashCards.containsDefinition(definition)) {
-//                System.out.println("The definition \"" + definition + "\" already exists. Try again:");
-//                definition = scanner.nextLine();
-//            }
-//
-//            //create a flash card and put in flash cards
-//            //flashCards is in form of term : definition
-//            Card<String, String> card = new Card<>(term, definition);
-//            flashCards.addCard(card);
-//
-//            count++;
-//        }
-//
-//        //the memory game start,
-//        //Ask all card's definitions in the order of addition. If wrong, outpu the correct definition
-//        //If the definition is wrong for the current term but it is correct for another, output the original term.
-//        for (String term : flashCards.keySet()) {
-//
-//            System.out.println("Print the definition of \"" + term + "\":");
-//            String answer = scanner.nextLine();
-//
-//            String correctAnswer =  flashCards.getDefinitionFromTerm(term);
-//
-//            if (Objects.equals(correctAnswer, answer)) {
-//                System.out.println("Correct answer.");
-//            }else{
-//
-//                if (flashCards.containsDefinition(answer)) {
-//                    System.out.println("Wrong answer. The correct one is \"" + correctAnswer + "\", you've just written the definition of \"" + flashCards.getTermFromDefinition(answer) + "\".");
-//
-//                }else {
-//                    System.out.println("Wrong answer. The correct one is \"" + correctAnswer + "\".");
-//                }
-//            }
-//        }
+    private static void exportCards() {
+        String fileName;
+        printMsg("File name:");
+        fileName = inputMsg();
+        File cardsFile = new File("./" + fileName);
+        try (FileWriter writer = new FileWriter(cardsFile);) {
+            for (var entry : flashCards.entrySet()) {
+                writer.write(entry.getKey() + ":" + entry.getValue() + ":"
+                        + (mistakes.get(entry.getKey()) == null ? 0 : mistakes.get(entry.getKey()))
+                        + "\n");
+            }
+            printMsg(flashCards.size() + " cards have been saved.");
+        } catch (IOException e) {
+            printMsg(String.format("File cannot be written. Error: %s", e));
+        }
+
+    }
+
+    private static void ask() {
+        String term;
+        int n;
+        int count = 1;
+
+        printMsg("How many times to ask?");
+        n = Integer.parseInt(inputMsg());
+
+        while (count <= n) {
+            for (String key : flashCards.keySet()) {
+//               System.out.println("Print the definition of \"" + key + "\":");
+                printMsg("Print the definition of \"" + key + "\":");
+                term = inputMsg();
+                if (term.equals(flashCards.get(key))) {
+                    printMsg("Correct answer.");
+                } else {
+                    if (flashCards.containsValue(term)) {
+                        printMsg("Wrong answer. The correct one is \"" + flashCards.get(key)
+                                + "\", you've just written the definition of \""
+                                + getKeyFromValue(flashCards, term) + "\".");
+
+                        mistakes.put(key , mistakes.containsKey(key) ?
+                                mistakes.get(key) + 1 : 1 );
+                    } else {
+                        printMsg("Wrong answer. The correct one is \"" + flashCards.get(key) + "\".");
+                        mistakes.put(key , mistakes.containsKey(key) ?
+                                mistakes.get(key) + 1 : 1 );
+                    }
+                }
+                count++;
+                if (count > n) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private static void log() {
+        printMsg("File name:");
+        String file = inputMsg();
+        File log = new File("./" + file);
+        try (FileWriter writer = new FileWriter(log)) {
+            for (String str : LOGGER) {
+                writer.append(str + "\n");
+            }
+            printMsg("The log has been saved.");
+        } catch (IOException e) {
+            printMsg("File could not be written. Error: " + e);
+        }
+    }
+
+    private static void printMsg(String string) {
+        System.out.println(string);
+        LOGGER.add(string);
+    }
+
+    private static String inputMsg() {
+        Scanner sc = new Scanner(System.in);
+        String input = sc.nextLine();
+        LOGGER.add(input);
+        return input;
+    }
+
+    private static void printCards() {
+        for (var entry : flashCards.entrySet()) {
+            System.out.println(entry);
+        }
+    }
+
+    private static void printMistakes() {
+        for (var entry : mistakes.entrySet()) {
+            System.out.println(entry);
+        }
+    }
+
+    private static void hardestCard() {
+        int max = 0;
+        ArrayList<String> mistake = new ArrayList<>();
+        for (var entry : mistakes.entrySet()) {
+            if (entry.getValue() > max) {
+                max = entry.getValue();
+            }
+        }
+        if (max == 0) {
+            printMsg("There are no cards with errors.");
+            return;
+        }
+        for (var entry : mistakes.entrySet()) {
+            if (entry.getValue() == max) {
+                mistake.add(entry.getKey());
+            }
+        }
+        if (mistake.size() > 1) { // if more than one card with same number of mistakes
+            StringBuilder sb = new StringBuilder();
+            for (String str : mistake) {
+                if (mistake.get(mistake.size() - 1).equals(str)) { // if this is the last element
+                    sb.append("\"" + str + "\".");
+                } else {
+                    sb.append(String.format("\"%s\", ", str));
+                }
+            }
+            printMsg("The hardest cards are "+ sb.toString() + " You have " + max + " errors answering them.");
+        } else {
+            printMsg("The hardest card is \"" + mistake.get(0) + "\". You have " + max + " errors answering it."); //todo: max > 1 errors : error
+        }
+    }
+
+    private static void resetMistakes() {
+        for (var entry : mistakes.entrySet()) {
+            entry.setValue(0);
+        }
+        printMsg("Card statistics has been reset.");
+    }
+
+    private static String getKeyFromValue(Map<String, String> map, String value) {
+        for (String key : map.keySet()) {
+            if (map.get(key).equals(value)) {
+//                System.out.println("map.get(entry)= " + map.get(key) + " value= " + value + " key=" + key);
+                return key;
+            }
+        }
+        return "unknown";
     }
 }
