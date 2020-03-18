@@ -82,6 +82,9 @@ public class Main {
     private static final String LOG = "log";
     private static final String HARDEST = "hardest card";
     private static final String RESET = "reset stats";
+    private static final String IMPORT_ARG = "-import";
+    private static final String EXPORT_ARG = "-export";
+    private static String EXPORT_ARG_FILENAME = "";
 
     private static final String PRINT = "print";
     private static final String PRINT_MIS = "print mistakes";
@@ -92,6 +95,7 @@ public class Main {
     private static Map<String, Integer> mistakes = new LinkedHashMap<>();
 
     public static void main(String[] args) {
+        readMainArgument(args);
         String userInput;
         do {
             printMsg("Input the action (add, remove, import, export, ask, exit, log, hardest card, reset stats):");
@@ -141,8 +145,28 @@ public class Main {
 
         } while (!userInput.equals(EXIT));
         System.out.println("Bye bye!");
-    }
 
+        if (!EXPORT_ARG_FILENAME.equals("")) {
+            exportCardsByProvidedFileName(EXPORT_ARG_FILENAME);
+        }
+
+    }
+    private static void readMainArgument(String[] args){
+        if (args.length == 0) return;
+        if (args.length == 2) {
+            if (args[0].equals(IMPORT_ARG)) importCardsByProvidedFileName(args[1]);
+            else if (args[0].equals(EXPORT_ARG)){
+                EXPORT_ARG_FILENAME = args[1];
+                return;
+            }
+        }
+        if (args.length == 4) {
+            if (args[0].equals(IMPORT_ARG)) importCardsByProvidedFileName(args[1]);
+            if (args[0].equals(EXPORT_ARG)) EXPORT_ARG_FILENAME = args[1];
+            if (args[2].equals(IMPORT_ARG)) importCardsByProvidedFileName(args[3]);
+            if (args[2].equals(EXPORT_ARG)) EXPORT_ARG_FILENAME = args[3];
+        }
+    }
     private static void addCard() {
         String term;
         String definition;
@@ -161,7 +185,6 @@ public class Main {
         }
         flashCards.put(term, definition);
         printMsg(String.format("The pair (\"%s\":\"%s\") has been added.", term, definition));
-
     }
 
     private static void removeCard() {
@@ -176,7 +199,30 @@ public class Main {
         }
 
     }
-
+    private static void importCardsByProvidedFileName(String filename) {
+        filename = "./" + filename;
+        File file = new File(filename);
+        try (Scanner filescanner = new Scanner(file)) {
+            String term = null;
+            String definition = null;
+            int mistake = 0;
+            int count = 0;
+            while (filescanner.hasNext()) {
+                String entry = filescanner.nextLine();
+                String[] entrySplit = entry.split(":");
+                term = entrySplit[0];
+                definition = entrySplit[1];
+                mistake = Integer.parseInt(entrySplit[2]);
+                flashCards.put(term, definition);
+                mistakes.put(term, mistake);
+                count++;
+            }
+            if (count == 0) return;
+            else printMsg(count + " " + (count > 1 ? "cards have been loaded." : "card has been loaded."));
+        }catch (FileNotFoundException e) {
+            printMsg("File not found. Error: " + e);
+        }
+    }
     private static void importCards() {
         String fileName;
         printMsg("File name:");
@@ -201,10 +247,21 @@ public class Main {
         } catch (FileNotFoundException e) {
             printMsg("File not found. Error: " + e);
         }
-
-
     }
-
+    private static void exportCardsByProvidedFileName(String filename) {
+        filename = "./" + filename;
+        File file = new File(filename);
+        try (FileWriter fw = new FileWriter(file)) {
+            for (var entry : flashCards.entrySet()) {
+                fw.write(entry.getKey() + ":" + entry.getValue() + ":"
+                        + (mistakes.get(entry.getKey()) == null ? 0 : mistakes.get(entry.getKey()))
+                        + "\n");
+            }
+            printMsg(flashCards.size() + " cards have been saved.");
+        }catch(IOException e) {
+            printMsg(String.format("File cannot be written. Error: %s", e));
+        }
+    }
     private static void exportCards() {
         String fileName;
         printMsg("File name:");
